@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Magic 8-Ball</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            background-color: #e0e0e0;
+        }
+        .container {
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        #question {
+            padding: 10px;
+            width: 300px;
+            margin-top: 20px;
+            text-align: center;
+        }
+        #ask-button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        .magic-ball {
+            width: 200px;
+            height: 200px;
+            background-color: black;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            border: 8px solid white; /* Bilardo topunun kenarını simüle etmek için beyaz kenarlık */
+        }
+        .magic-ball .number {
+            content: "8";
+            color: black; /* 8 yazısını siyah yapıyoruz */
+            font-size: 100px; /* Yazı boyutunu büyüttük */
+            font-weight: bold;
+            position: absolute;
+            top: 30px;
+            text-align: center;
+        }
+        .answer {
+            width: 100px;
+            height: 100px;
+            background-color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            text-align: center;
+            padding: 10px;
+        }
+        .footer {
+            position: absolute;
+            right: 10px;
+            bottom: 10px;
+            font-size: 14px;
+            color: #555;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="magic-ball">
+            <div class="number" id="ball-number">8</div>
+            <div class="answer" id="answer"></div>
+        </div>
+        <input type="text" id="question" placeholder="Bir soru sorun...">
+        <button id="ask-button">Sor</button>
+    </div>
+    <div class="footer">
+        Yusuf Kaan Saçlı tarafından yapıldı
+    </div>
+    <script>
+        const answers = [
+            {text: "Kesinlikle evet", color: "#FF5733"},
+            {text: "Hayır", color: "#33FF57"},
+            {text: "Belki", color: "#5733FF"},
+            {text: "Şu an emin değilim", color: "#FFC300"},
+            {text: "Kesinlikle hayır", color: "#C70039"},
+            {text: "Daha sonra sor", color: "#900C3F"},
+            {text: "Evet, ama dikkatli ol", color: "#581845"},
+            {text: "Olabilir", color: "#2E86C1"},
+            {text: "İmkansız", color: "#28B463"},
+            {text: "Görünüşe göre evet", color: "#A569BD"},
+            {text: "Şu anda cevap veremem", color: "#D68910"},
+            {text: "Kesinlikle!", color: "#E74C3C"},
+            {text: "Şüpheli", color: "#7D3C98"},
+            {text: "Buna güvenme", color: "#17A589"},
+            {text: "Şansını bir daha dene", color: "#F1C40F"},
+            {text: "Durum belirsiz", color: "#D35400"},
+            {text: "Büyük ihtimalle", color: "#E67E22"},
+            {text: "Bu konuda emin değilim", color: "#EC7063"},
+            {text: "Görünüşe göre hayır", color: "#AF7AC5"},
+            {text: "Evet, kesin", color: "#5499C7"},
+            {text: "Sorun biraz karmaşık", color: "#48C9B0"},
+            {text: "Zaman gösterecek", color: "#2ECC71"},
+            {text: "Cevap vermek istemiyorum", color: "#5D6D7E"},
+            {text: "Düşünmelisin", color: "#AAB7B8"},
+            {text: "Sana bağlı", color: "#F7DC6F"},
+            {text: "Eğer inanırsan", color: "#DC7633"},
+            {text: "Belki de", color: "#BA4A00"},
+            {text: "Buna hazır mısın?", color: "#7FB3D5"},
+            {text: "Kendi yolunu seç", color: "#45B39D"},
+            {text: "Bu senin kararın", color: "#F4D03F"}
+        ];
+
+        document.getElementById("ask-button").addEventListener("click", function() {
+            let question = document.getElementById("question").value.trim();
+            if (question === "") {
+                alert("Lütfen bir soru sorun!");
+                return;
+            }
+            let randomIndex = Math.floor(Math.random() * answers.length);
+            let selectedAnswer = answers[randomIndex];
+            document.getElementById("answer").innerText = selectedAnswer.text;
+            document.body.style.backgroundColor = selectedAnswer.color;
+            
+            // 8 yazısını gizleme
+            document.getElementById("ball-number").style.display = "none";
+            document.getElementById("answer").style.display = "flex"; // Cevabı göstermek için
+        });
+    </script>
+</body>
+</html>
