@@ -5,220 +5,174 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Magic 8-Ball</title>
     <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-
         body {
-            background: #0f111a;
-            color: #fff;
-            font-family: Arial, sans-serif;
-            min-height: 100vh;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            padding: 20px;
-            overflow-x: hidden;
+            height: 100vh;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            background-color: #12131a;
+            color: white;
+            overflow: hidden;
         }
 
         .container {
+            text-align: center;
             display: flex;
             flex-direction: column;
             align-items: center;
-            max-width: 500px;
-            width: 100%;
         }
 
-        h1 {
-            font-size: 32px;
-            margin-bottom: 25px;
-            text-align: center;
-            color: #f1f5f9;
+        h2 {
+            margin-bottom: 20px;
         }
 
-        .ball-scene {
-            perspective: 800px;
-            width: 250px;
-            height: 250px;
-            margin: 10px 0 35px 0;
-            position: relative;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            user-select: none;
+        .sahne {
+            perspective: 600px;
+            margin-bottom: 20px;
         }
 
-        .ball {
-            width: 240px;
-            height: 240px;
+        .top {
+            width: 220px;
+            height: 220px;
+            background: radial-gradient(circle at 35% 30%, #555 0%, #1a1a1a 40%, #000 85%);
             border-radius: 50%;
-            background: radial-gradient(circle at 35% 30%, #4b4d58 0%, #1d1e24 35%, #050608 85%);
-            box-shadow: 
-                inset -10px -10px 25px rgba(0, 0, 0, 0.9),
-                inset 8px 8px 18px rgba(255, 255, 255, 0.1),
-                0 25px 40px rgba(0, 0, 0, 0.7);
-            position: relative;
             display: flex;
             align-items: center;
             justify-content: center;
+            position: relative;
+            box-shadow: 0 25px 35px rgba(0,0,0,0.7), inset -8px -8px 20px rgba(0,0,0,0.9);
             cursor: pointer;
-            transition: transform 0.1s ease-out;
-            transform-style: preserve-3d;
+            transition: transform 0.08s ease-out;
         }
 
-        .ball-gloss {
+        .parlama {
             position: absolute;
             top: 0;
             left: 0;
-            right: 0;
-            bottom: 0;
+            width: 220px;
+            height: 220px;
             border-radius: 50%;
-            background: radial-gradient(circle at 35% 30%, rgba(255, 255, 255, 0.5) 0%, rgba(255, 255, 255, 0.05) 25%, transparent 50%);
+            background: radial-gradient(circle at 35% 30%, rgba(255,255,255,0.35) 0%, transparent 40%);
             pointer-events: none;
         }
 
-        .shadow {
-            position: absolute;
-            bottom: -15px;
-            width: 180px;
-            height: 24px;
-            background: radial-gradient(ellipse at center, rgba(0,0,0,0.8) 0%, transparent 70%);
+        .golge {
+            width: 160px;
+            height: 20px;
+            background: radial-gradient(ellipse at center, rgba(0,0,0,0.6) 0%, transparent 70%);
+            margin: 5px auto 0 auto;
             border-radius: 50%;
-            z-index: -1;
         }
 
-        .window {
-            width: 110px;
-            height: 110px;
+        .sekiz-daire {
+            width: 100px;
+            height: 100px;
+            background: radial-gradient(circle at 40% 35%, #fff 0%, #ddd 80%);
             border-radius: 50%;
-            position: relative;
             display: flex;
             align-items: center;
             justify-content: center;
-            transform: translateZ(10px);
-        }
-
-        .badge-8 {
-            width: 100%;
-            height: 100%;
-            border-radius: 50%;
-            background: radial-gradient(circle at 40% 35%, #ffffff 0%, #e5e7eb 70%, #d1d5db 100%);
-            box-shadow: inset 0 2px 6px rgba(0,0,0,0.3), 0 4px 10px rgba(0,0,0,0.4);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 72px;
+            font-size: 70px;
             font-weight: bold;
-            color: #111;
+            color: black;
+            box-shadow: inset 0 2px 5px rgba(0,0,0,0.3);
+            user-select: none;
         }
 
-        .answer-box {
-            width: 100%;
-            height: 100%;
+        .cevap {
+            width: 100px;
+            height: 100px;
+            background: radial-gradient(circle, #1a2a4a 0%, #080c14 90%);
             border-radius: 50%;
-            background: radial-gradient(circle at 50% 50%, #1e3a8a 0%, #0f172a 80%);
-            box-shadow: inset 0 0 15px rgba(56, 189, 248, 0.5), inset 0 4px 8px rgba(0,0,0,0.9);
             display: none;
             align-items: center;
             justify-content: center;
-            text-align: center;
-            padding: 12px;
-            color: #38bdf8;
-            font-size: 13px;
             font-weight: bold;
-            text-transform: uppercase;
-            line-height: 1.3;
+            text-align: center;
+            padding: 8px;
+            font-size: 12px;
+            color: #4da6ff;
+            box-shadow: inset 0 0 10px #0055ff;
+            user-select: none;
         }
 
-        .shake {
-            animation: shaking 0.6s ease-in-out;
-        }
-
-        @keyframes shaking {
-            0% { transform: translate(0, 0) rotate(0deg); }
-            20% { transform: translate(-12px, 8px) rotate(-10deg); }
-            40% { transform: translate(12px, -8px) rotate(10deg); }
-            60% { transform: translate(-8px, -6px) rotate(-6deg); }
-            80% { transform: translate(8px, 6px) rotate(6deg); }
-            100% { transform: translate(0, 0) rotate(0deg); }
-        }
-
-        .input-row {
-            display: flex;
-            gap: 10px;
-            width: 100%;
-            margin-top: 10px;
-        }
-
-        #question {
-            flex: 1;
-            padding: 12px 16px;
-            font-size: 16px;
-            border-radius: 8px;
-            border: 1px solid #334155;
-            background: #1e293b;
-            color: #fff;
+        #soru {
+            padding: 10px;
+            width: 280px;
+            margin-top: 15px;
+            text-align: center;
+            border-radius: 6px;
+            border: 1px solid #444;
+            background: #222;
+            color: white;
+            font-size: 15px;
             outline: none;
         }
 
-        #question:focus {
-            border-color: #6366f1;
-        }
-
-        #ask-btn {
-            padding: 12px 24px;
-            font-size: 16px;
-            font-weight: bold;
-            color: #fff;
-            background: #6366f1;
-            border: none;
-            border-radius: 8px;
+        #sor-btn {
+            padding: 10px 25px;
+            font-size: 15px;
             cursor: pointer;
+            margin-top: 10px;
+            background-color: #3b82f6;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-weight: bold;
         }
 
-        #ask-btn:hover {
-            background: #4f46e5;
+        #sor-btn:hover {
+            background-color: #2563eb;
         }
 
         .footer {
-            margin-top: 30px;
+            position: absolute;
+            bottom: 10px;
             font-size: 13px;
-            color: #64748b;
-            text-align: center;
+            color: #777;
+        }
+
+        @keyframes titreme {
+            0% { transform: translate(0, 0); }
+            20% { transform: translate(-10px, 8px) rotate(-8deg); }
+            40% { transform: translate(10px, -8px) rotate(8deg); }
+            60% { transform: translate(-8px, -5px) rotate(-5deg); }
+            80% { transform: translate(8px, 5px) rotate(5deg); }
+            100% { transform: translate(0, 0); }
+        }
+
+        .sallaniyor {
+            animation: titreme 0.5s ease-in-out !important;
         }
     </style>
 </head>
 <body>
 
     <div class="container">
-        <h1>Magic 8-Ball</h1>
+        <h2>Magic 8-Ball</h2>
 
-        <div class="ball-scene">
-            <div class="ball" id="ball">
-                <div class="ball-gloss"></div>
-                <div class="window">
-                    <div class="badge-8" id="badge-8">8</div>
-                    <div class="answer-box" id="answer-box"></div>
-                </div>
+        <div class="sahne">
+            <div class="top" id="top">
+                <div class="parlama"></div>
+                <div class="sekiz-daire" id="sekiz">8</div>
+                <div class="cevap" id="cevap"></div>
             </div>
-            <div class="shadow"></div>
+            <div class="golge"></div>
         </div>
 
-        <div class="input-row">
-            <input type="text" id="question" placeholder="Bir soru yazın...">
-            <button id="ask-btn">Sor</button>
-        </div>
+        <input type="text" id="soru" placeholder="Bir soru sorun...">
+        <button id="sor-btn">Sor</button>
+    </div>
 
-        <div class="footer">
-            Yusuf Kaan Saçlı - Forked by Kayra
-        </div>
+    <div class="footer">
+        Yusuf Kaan Saçlı tarafından yapıldı (Edited by Kayra)
     </div>
 
     <script>
-        const answers = [
+        var cevaplar = [
             "Kesin bilgi, yayalım",
             "Rüyanda görürsün",
             "Bana soracağına git uyu",
@@ -251,60 +205,50 @@
             "Yüzde bir milyon evet"
         ];
 
-        const ball = document.getElementById("ball");
-        const badge8 = document.getElementById("badge-8");
-        const answerBox = document.getElementById("answer-box");
-        const questionInput = document.getElementById("question");
-        const askBtn = document.getElementById("ask-btn");
+        var topDiv = document.getElementById("top");
+        var sekizDiv = document.getElementById("sekiz");
+        var cevapDiv = document.getElementById("cevap");
+        var soruInput = document.getElementById("soru");
+        var btn = document.getElementById("sor-btn");
 
-        let isShaking = false;
+        var calisiyor = false;
 
-        window.addEventListener("mousemove", (e) => {
-            if (isShaking) return;
-            const rect = ball.getBoundingClientRect();
-            const x = e.clientX - (rect.left + rect.width / 2);
-            const y = e.clientY - (rect.top + rect.height / 2);
-            const rotY = Math.max(-25, Math.min(25, x * 0.08));
-            const rotX = Math.max(-25, Math.min(25, -y * 0.08));
-            ball.style.transform = `perspective(800px) rotateX(${rotX}deg) rotateY(${rotY}deg)`;
-        });
+        window.onmousemove = function(e) {
+            if (calisiyor) return;
+            var x = (e.clientX - window.innerWidth / 2) * 0.05;
+            var y = (e.clientY - window.innerHeight / 2) * 0.05;
+            topDiv.style.transform = "perspective(600px) rotateY(" + x + "deg) rotateX(" + (-y) + "deg)";
+        };
 
-        window.addEventListener("mouseleave", () => {
-            if (isShaking) return;
-            ball.style.transform = "perspective(800px) rotateX(0deg) rotateY(0deg)";
-        });
-
-        function ask() {
-            if (isShaking) return;
-
-            const q = questionInput.value.trim();
-            if (!q) {
-                alert("Lütfen önce bir soru yazın!");
+        function cevapVer() {
+            var soru = soruInput.value.trim();
+            if (soru == "") {
+                alert("Lütfen bir soru sorun!");
                 return;
             }
 
-            isShaking = true;
-            ball.classList.add("shake");
-            badge8.style.display = "none";
-            answerBox.style.display = "none";
+            calisiyor = true;
+            topDiv.classList.add("sallaniyor");
+            sekizDiv.style.display = "none";
+            cevapDiv.style.display = "none";
 
-            setTimeout(() => {
-                ball.classList.remove("shake");
-                const randomAnswer = answers[Math.floor(Math.random() * answers.length)];
-                answerBox.innerText = randomAnswer;
-                answerBox.style.display = "flex";
-                isShaking = false;
-            }, 600);
+            setTimeout(function() {
+                topDiv.classList.remove("sallaniyor");
+                var index = Math.floor(Math.random() * cevaplar.length);
+                cevapDiv.innerText = cevaplar[index];
+                cevapDiv.style.display = "flex";
+                calisiyor = false;
+            }, 500);
         }
 
-        askBtn.addEventListener("click", ask);
-        ball.addEventListener("click", ask);
+        btn.onclick = cevapVer;
+        topDiv.onclick = cevapVer;
 
-        questionInput.addEventListener("keydown", (e) => {
+        soruInput.onkeydown = function(e) {
             if (e.key === "Enter") {
-                ask();
+                cevapVer();
             }
-        });
+        };
     </script>
 </body>
 </html>
