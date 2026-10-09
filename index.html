@@ -3,137 +3,964 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Magic 8-Ball</title>
+    <title>Magic 8-Ball 3D 🎱</title>
+    <meta name="description" content="İnteraktif 3D Magic 8-Ball! Fareyi takip eden 3D bilardo topu animasyonu, esprili Türkçe yanıtlar ve sihirli kehanetler.">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <style>
-        body {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-            font-family: Arial, sans-serif;
+        :root {
+            --bg-color-1: #090a10;
+            --bg-color-2: #141624;
+            --accent-glow: rgba(99, 102, 241, 0.35);
+            --ball-size: 280px;
+            --window-size: 130px;
+            --light-x: 35%;
+            --light-y: 28%;
+            --mood-glow: rgba(79, 140, 255, 0.4);
+        }
+
+        * {
+            box-sizing: border-box;
             margin: 0;
-            background-color: #e0e0e0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
         }
-        .container {
-            text-align: center;
+
+        body {
+            font-family: 'Outfit', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            min-height: 100vh;
+            min-height: 100dvh;
             display: flex;
             flex-direction: column;
             align-items: center;
-        }
-        #question {
-            padding: 10px;
-            width: 300px;
-            margin-top: 20px;
-            text-align: center;
-        }
-        #ask-button {
-            padding: 10px 20px;
-            font-size: 16px;
-            cursor: pointer;
-            margin-top: 10px;
-        }
-        .magic-ball {
-            width: 200px;
-            height: 200px;
-            background-color: black;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
             justify-content: center;
+            background: radial-gradient(circle at 50% 20%, var(--bg-color-2) 0%, var(--bg-color-1) 80%);
+            color: #f1f5f9;
+            overflow-x: hidden;
             position: relative;
-            border: 8px solid white; /* Bilardo topunun kenarını simüle etmek için beyaz kenarlık */
+            padding: 20px;
+            transition: background 0.8s ease;
         }
-        .magic-ball .number {
-            content: "8";
-            color: black; /* 8 yazısını siyah yapıyoruz */
-            font-size: 100px; /* Yazı boyutunu büyüttük */
-            font-weight: bold;
+
+        /* Arka Plan Ortam Parıltıları */
+        .ambient-glow {
+            position: fixed;
+            width: 500px;
+            height: 500px;
+            border-radius: 50%;
+            background: radial-gradient(circle, var(--mood-glow) 0%, transparent 70%);
+            filter: blur(60px);
+            opacity: 0.6;
+            z-index: 0;
+            pointer-events: none;
+            transition: background 1s ease, opacity 0.5s ease;
+            top: 20%;
+            left: 50%;
+            transform: translate(-50%, -30%);
+        }
+
+        /* Üst Menü / Kontroller */
+        .header-controls {
             position: absolute;
-            top: 30px;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            gap: 10px;
+            z-index: 20;
+        }
+
+        .icon-btn {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: #e2e8f0;
+            width: 42px;
+            height: 42px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            backdrop-filter: blur(10px);
+            font-size: 18px;
+            transition: all 0.25s ease;
+        }
+
+        .icon-btn:hover {
+            background: rgba(255, 255, 255, 0.18);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Ana Kapsayıcı */
+        .app-container {
+            position: relative;
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            max-width: 600px;
+            margin: auto;
+        }
+
+        /* Başlık Alanı */
+        .app-title {
+            font-size: 2.2rem;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            margin-bottom: 6px;
+            text-align: center;
+            background: linear-gradient(135deg, #ffffff 30%, #94a3b8 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+        }
+
+        .app-subtitle {
+            font-size: 0.95rem;
+            color: #94a3b8;
+            margin-bottom: 25px;
             text-align: center;
         }
-        .answer {
-            width: 100px;
-            height: 100px;
-            background-color: white;
+
+        /* 3D Sahne ve Top Alanı */
+        .ball-stage {
+            perspective: 1000px;
+            width: var(--ball-size);
+            height: var(--ball-size);
+            margin: 15px 0 25px 0;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            user-select: none;
+        }
+
+        /* 3D Küre */
+        .magic-ball-3d {
+            width: var(--ball-size);
+            height: var(--ball-size);
+            border-radius: 50%;
+            position: relative;
+            transform-style: preserve-3d;
+            cursor: grab;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            /* 3D Işıklandırma ve Gerçekçi Derinlik */
+            background: radial-gradient(
+                circle at var(--light-x) var(--light-y),
+                #434753 0%,
+                #23252d 28%,
+                #111216 60%,
+                #030305 100%
+            );
+            box-shadow:
+                inset -14px -18px 36px rgba(59, 130, 246, 0.15),
+                inset 10px 10px 25px rgba(255, 255, 255, 0.1),
+                inset 0 0 25px rgba(0, 0, 0, 0.95),
+                0 30px 60px rgba(0, 0, 0, 0.75),
+                0 12px 24px rgba(0, 0, 0, 0.5);
+            transition: transform 0.12s cubic-bezier(0.2, 0.8, 0.2, 1);
+            will-change: transform;
+        }
+
+        .magic-ball-3d:active {
+            cursor: grabbing;
+        }
+
+        /* Küre Yüzeyindeki Dinamik Parlama Efekti */
+        .ball-gloss {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            border-radius: 50%;
+            pointer-events: none;
+            background: radial-gradient(
+                circle at var(--light-x) var(--light-y),
+                rgba(255, 255, 255, 0.75) 0%,
+                rgba(255, 255, 255, 0.18) 18%,
+                transparent 48%
+            );
+            mix-blend-mode: overlay;
+        }
+
+        /* Zemin Gölgesi */
+        .ball-shadow {
+            position: absolute;
+            bottom: -22px;
+            width: 75%;
+            height: 32px;
+            border-radius: 50%;
+            background: radial-gradient(
+                ellipse at center,
+                rgba(0, 0, 0, 0.8) 0%,
+                rgba(0, 0, 0, 0.35) 45%,
+                transparent 72%
+            );
+            filter: blur(8px);
+            z-index: -1;
+            transition: all 0.3s ease;
+            pointer-events: none;
+        }
+
+        /* Ortadaki Rozet / Sıvı Penceresi */
+        .inner-window {
+            width: var(--window-size);
+            height: var(--window-size);
+            border-radius: 50%;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transform: translateZ(20px);
+            transform-style: preserve-3d;
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            overflow: hidden;
+        }
+
+        /* Durum 1: "8" Rakamı Rozeti */
+        .badge-eight {
+            position: absolute;
+            width: 100%;
+            height: 100%;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-weight: bold;
-            text-align: center;
-            padding: 10px;
+            background: radial-gradient(circle at 40% 35%, #ffffff 0%, #f1f3f5 55%, #d1d5db 100%);
+            box-shadow:
+                inset 0 4px 10px rgba(0, 0, 0, 0.25),
+                inset 0 -3px 6px rgba(255, 255, 255, 0.8),
+                0 6px 14px rgba(0, 0, 0, 0.45);
+            transition: opacity 0.4s ease, transform 0.4s ease;
         }
-        .footer {
+
+        .eight-digit {
+            font-size: 78px;
+            font-weight: 900;
+            color: #0f172a;
+            line-height: 1;
+            font-family: 'Outfit', sans-serif;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Durum 2: Sihirli Sıvı ve Cevap Alanı */
+        .mystic-viewport {
             position: absolute;
-            right: 10px;
-            bottom: 10px;
-            font-size: 14px;
-            color: #555;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: radial-gradient(circle at 50% 50%, #172554 0%, #0b1329 65%, #030712 100%);
+            box-shadow:
+                inset 0 0 20px rgba(56, 189, 248, 0.5),
+                inset 0 8px 16px rgba(0, 0, 0, 0.9),
+                0 4px 12px rgba(0, 0, 0, 0.5);
+            opacity: 0;
+            transform: scale(0.85);
+            pointer-events: none;
+            transition: opacity 0.5s ease, transform 0.5s ease;
+            padding: 12px;
+        }
+
+        /* Sıvıda Yüzen İkonik Üçgen Zar Efekti */
+        .mystic-triangle {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            position: relative;
+        }
+
+        .answer-text {
+            color: #38bdf8;
+            font-size: 13.5px;
+            font-weight: 700;
+            line-height: 1.35;
+            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            text-shadow: 0 0 10px rgba(56, 189, 248, 0.8), 0 0 20px rgba(56, 189, 248, 0.4);
+            transition: opacity 0.4s ease, transform 0.4s ease;
+            max-width: 105px;
+            word-break: break-word;
+        }
+
+        /* Animasyonlar */
+        /* Sallanma Animasyonu */
+        @keyframes violentShake {
+            0% { transform: translate3d(0, 0, 0) rotate(0deg); }
+            10% { transform: translate3d(-18px, -14px, 15px) rotate(-14deg); }
+            20% { transform: translate3d(16px, 12px, -10px) rotate(12deg); }
+            30% { transform: translate3d(-14px, 15px, 10px) rotate(-10deg); }
+            40% { transform: translate3d(14px, -12px, -15px) rotate(9deg); }
+            50% { transform: translate3d(-10px, -10px, 8px) rotate(-7deg); }
+            60% { transform: translate3d(10px, 8px, -6px) rotate(6deg); }
+            70% { transform: translate3d(-6px, 6px, 5px) rotate(-4deg); }
+            80% { transform: translate3d(5px, -4px, -3px) rotate(3deg); }
+            90% { transform: translate3d(-2px, 2px, 0) rotate(-1deg); }
+            100% { transform: translate3d(0, 0, 0) rotate(0deg); }
+        }
+
+        .is-shaking {
+            animation: violentShake 0.85s cubic-bezier(0.36, 0.07, 0.19, 0.97) both !important;
+        }
+
+        /* Cevabın Sıvıdan Yukarı Süzülüş Animasyonu */
+        @keyframes floatUpLiquid {
+            0% {
+                opacity: 0;
+                transform: scale(0.4) rotate(-15deg);
+                filter: blur(5px);
+            }
+            70% {
+                transform: scale(1.06) rotate(2deg);
+                filter: blur(0px);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1) rotate(0deg);
+                filter: blur(0px);
+            }
+        }
+
+        .reveal-answer {
+            animation: floatUpLiquid 0.9s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        /* Rölantide Hafif Süzülme (Mouse Boştayken) */
+        @keyframes idleHover {
+            0%, 100% {
+                transform: translateY(0px) rotateX(0deg);
+            }
+            50% {
+                transform: translateY(-8px) rotateX(2deg);
+            }
+        }
+
+        .idle-floating {
+            animation: idleHover 4.5s ease-in-out infinite;
+        }
+
+        /* Form ve Etkileşim Kartı */
+        .glass-card {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 22px;
+            backdrop-filter: blur(16px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.35);
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 10px;
+            width: 100%;
+        }
+
+        #question-input {
+            flex: 1;
+            padding: 14px 18px;
+            font-size: 15.5px;
+            font-family: inherit;
+            background: rgba(15, 23, 42, 0.65);
+            border: 1px solid rgba(255, 255, 255, 0.14);
+            border-radius: 14px;
+            color: #f8fafc;
+            outline: none;
+            transition: all 0.25s ease;
+        }
+
+        #question-input::placeholder {
+            color: #64748b;
+        }
+
+        #question-input:focus {
+            border-color: #6366f1;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.25);
+            background: rgba(15, 23, 42, 0.9);
+        }
+
+        .btn-primary {
+            padding: 14px 26px;
+            font-size: 15.5px;
+            font-weight: 700;
+            font-family: inherit;
+            color: #ffffff;
+            background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+            border: none;
+            border-radius: 14px;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            box-shadow: 0 6px 20px rgba(99, 102, 241, 0.35);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            white-space: nowrap;
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #4f46e5 0%, #4338ca 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(99, 102, 241, 0.5);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Hızlı Soru Örnekleri (Chips) */
+        .preset-container {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .preset-title {
+            font-size: 12px;
+            font-weight: 600;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .preset-chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 7px;
+        }
+
+        .chip {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 99px;
+            padding: 6px 12px;
+            font-size: 12.5px;
+            color: #94a3b8;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .chip:hover {
+            background: rgba(255, 255, 255, 0.12);
+            color: #e2e8f0;
+            border-color: rgba(255, 255, 255, 0.2);
+            transform: translateY(-1px);
+        }
+
+        /* Durum Mesajı / Yardımcı İpucu */
+        .status-hint {
+            text-align: center;
+            font-size: 13px;
+            color: #64748b;
+            min-height: 18px;
+            margin-top: 4px;
+        }
+
+        /* Alt Bilgi / Footer */
+        .footer {
+            margin-top: 25px;
+            font-size: 13px;
+            color: #64748b;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            z-index: 10;
+        }
+
+        .footer a {
+            color: #94a3b8;
+            text-decoration: none;
+            transition: color 0.2s ease;
+        }
+
+        .footer a:hover {
+            color: #6366f1;
+            text-decoration: underline;
+        }
+
+        /* Mobil Optimizasyonu */
+        @media (max-width: 480px) {
+            :root {
+                --ball-size: 230px;
+                --window-size: 110px;
+            }
+
+            .app-title {
+                font-size: 1.8rem;
+            }
+
+            .eight-digit {
+                font-size: 64px;
+            }
+
+            .answer-text {
+                font-size: 12px;
+                max-width: 90px;
+            }
+
+            .input-group {
+                flex-direction: column;
+            }
+
+            .btn-primary {
+                width: 100%;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="magic-ball">
-            <div class="number" id="ball-number">8</div>
-            <div class="answer" id="answer"></div>
+
+    <!-- Arka Plan Işıklandırması -->
+    <div class="ambient-glow" id="ambient-glow"></div>
+
+    <!-- Üst Kontroller -->
+    <div class="header-controls">
+        <button class="icon-btn" id="sound-btn" title="Ses Aç/Kapat" aria-label="Sesi Aç veya Kapat">🔊</button>
+        <button class="icon-btn" id="reset-btn" title="Topu Başlangıç Durumuna Sıfırla" aria-label="Topu Sıfırla">🔄</button>
+    </div>
+
+    <!-- Ana Uygulama -->
+    <main class="app-container">
+        <h1 class="app-title">Magic 8-Ball 3D</h1>
+        <p class="app-subtitle">Aklındaki soruyu fısılda, sihirli küre geleceğini söylesin</p>
+
+        <!-- 3D Sahne -->
+        <div class="ball-stage" id="ball-stage">
+            <div class="magic-ball-3d idle-floating" id="magic-ball" role="button" aria-label="Sihirli 8 Numaralı Top" tabindex="0">
+                <div class="ball-gloss"></div>
+                <div class="inner-window" id="inner-window">
+                    <!-- Rozet (8 Numarası) -->
+                    <div class="badge-eight" id="badge-eight">
+                        <span class="eight-digit">8</span>
+                    </div>
+                    <!-- Sıvı Penceresi ve Cevap -->
+                    <div class="mystic-viewport" id="mystic-viewport">
+                        <div class="mystic-triangle">
+                            <span class="answer-text" id="answer-text"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="ball-shadow" id="ball-shadow"></div>
         </div>
-        <input type="text" id="question" placeholder="Bir soru sorun...">
-        <button id="ask-button">Sor</button>
-    </div>
-    <div class="footer">
-        Yusuf Kaan Saçlı tarafından yapıldı
-    </div>
+
+        <!-- Soru ve Etkileşim Kartı -->
+        <div class="glass-card">
+            <form id="ask-form" class="input-group" onsubmit="return false;">
+                <input 
+                    type="text" 
+                    id="question-input" 
+                    placeholder="Bir soru sor... (örn: Bugün şansım yaver gidecek mi?)" 
+                    autocomplete="off"
+                    maxlength="120"
+                    aria-label="Sorunuzu yazın"
+                >
+                <button type="submit" id="ask-button" class="btn-primary">
+                    <span>Salla & Sor</span> 🎱
+                </button>
+            </form>
+
+            <!-- Hızlı Soru Çipleri -->
+            <div class="preset-container">
+                <span class="preset-title">Hızlı Sorular:</span>
+                <div class="preset-chips">
+                    <button type="button" class="chip" data-q="Bugün piyango bileti almalı mıyım?">Bugün piyango almalı mıyım?</button>
+                    <button type="button" class="chip" data-q="O da beni düşünüyor mu?">O da beni düşünüyor mu?</button>
+                    <button type="button" class="chip" data-q="Bu iş teklifini kabul etmeli miyim?">Bu teklifi kabul etmeli miyim?</button>
+                    <button type="button" class="chip" data-q="Hafta sonu planım tutacak mı?">Hafta sonu planım tutacak mı?</button>
+                </div>
+            </div>
+
+            <div class="status-hint" id="status-hint">Topu sallamak için soru sorup Enter'a basın veya topa tıklayın!</div>
+        </div>
+
+        <!-- Footer / İmza -->
+        <footer class="footer">
+            <div>Orijinal Proje: <a href="https://github.com/YKaanSacli" target="_blank" rel="noopener noreferrer">Yusuf Kaan Saçlı</a></div>
+            <div>3D Render & İnteraktif Geliştirme: <a href="https://github.com/byKAYRA" target="_blank" rel="noopener noreferrer">Kayra Onur (byKAYRA)</a></div>
+        </footer>
+    </main>
+
     <script>
+        /* ==============================================================
+           ESPRİLİ & ÇEŞİTLİ CEVAP HAVUZU (40+ Yanıt)
+           ============================================================== */
         const answers = [
-            {text: "Kesinlikle evet", color: "#FF5733"},
-            {text: "Hayır", color: "#33FF57"},
-            {text: "Belki", color: "#5733FF"},
-            {text: "Şu an emin değilim", color: "#FFC300"},
-            {text: "Kesinlikle hayır", color: "#C70039"},
-            {text: "Daha sonra sor", color: "#900C3F"},
-            {text: "Evet, ama dikkatli ol", color: "#581845"},
-            {text: "Olabilir", color: "#2E86C1"},
-            {text: "İmkansız", color: "#28B463"},
-            {text: "Görünüşe göre evet", color: "#A569BD"},
-            {text: "Şu anda cevap veremem", color: "#D68910"},
-            {text: "Kesinlikle!", color: "#E74C3C"},
-            {text: "Şüpheli", color: "#7D3C98"},
-            {text: "Buna güvenme", color: "#17A589"},
-            {text: "Şansını bir daha dene", color: "#F1C40F"},
-            {text: "Durum belirsiz", color: "#D35400"},
-            {text: "Büyük ihtimalle", color: "#E67E22"},
-            {text: "Bu konuda emin değilim", color: "#EC7063"},
-            {text: "Görünüşe göre hayır", color: "#AF7AC5"},
-            {text: "Evet, kesin", color: "#5499C7"},
-            {text: "Sorun biraz karmaşık", color: "#48C9B0"},
-            {text: "Zaman gösterecek", color: "#2ECC71"},
-            {text: "Cevap vermek istemiyorum", color: "#5D6D7E"},
-            {text: "Düşünmelisin", color: "#AAB7B8"},
-            {text: "Sana bağlı", color: "#F7DC6F"},
-            {text: "Eğer inanırsan", color: "#DC7633"},
-            {text: "Belki de", color: "#BA4A00"},
-            {text: "Buna hazır mısın?", color: "#7FB3D5"},
-            {text: "Kendi yolunu seç", color: "#45B39D"},
-            {text: "Bu senin kararın", color: "#F4D03F"}
+            // Pozitif & Eğlenceli
+            { text: "Kesin bilgi, yayalım!", mood: "positive", color: "#10b981" },
+            { text: "Yıldızlar bile 'evet' diye bağırıyor!", mood: "positive", color: "#06b6d4" },
+            { text: "Şüphen olmasın kanka, kesin!", mood: "positive", color: "#3b82f6" },
+            { text: "Medyum Memiş onayladı, arkana yaslan.", mood: "positive", color: "#6366f1" },
+            { text: "Yapay zeka hesapladı: %100 evet.", mood: "positive", color: "#10b981" },
+            { text: "Bunu sorman bile hata, tabii ki evet!", mood: "positive", color: "#06b6d4" },
+            { text: "Kaderin yeşil ışık yaktı, gazla!", mood: "positive", color: "#10b981" },
+            { text: "Evren arkanda, yürü kim tutar seni!", mood: "positive", color: "#3b82f6" },
+            { text: "Kesinlikle! Git ve o adımı at!", mood: "positive", color: "#10b981" },
+            { text: "Falında safi mutluluk çıktı, evet!", mood: "positive", color: "#8b5cf6" },
+            { text: "Yüzde bir milyon evet!", mood: "positive", color: "#06b6d4" },
+            { text: "Gözün kapalı evet diyebilirsin.", mood: "positive", color: "#10b981" },
+
+            // Negatif & Esprili Redler
+            { text: "Rüyanda görürsün ancak.", mood: "negative", color: "#ef4444" },
+            { text: "Bunu unut sen, başka bir şey dile.", mood: "negative", color: "#f43f5e" },
+            { text: "Evren bu soruya 'Error 404' verdi.", mood: "negative", color: "#ef4444" },
+            { text: "Falında dram çıktı, maalesef hayır.", mood: "negative", color: "#dc2626" },
+            { text: "Yapay zeka bile buna 'yok artık' dedi.", mood: "negative", color: "#e11d48" },
+            { text: "Şansını hiç zorlama, kocaman bir hayır.", mood: "negative", color: "#ef4444" },
+            { text: "İçimden bir ses 'sakın yapma' diyor.", mood: "negative", color: "#b91c1c" },
+            { text: "Gezegenler ters dönüyor, bugün olmaz.", mood: "negative", color: "#f43f5e" },
+            { text: "Piyango çıkma ihtimali bundan yüksek.", mood: "negative", color: "#ef4444" },
+            { text: "Buna güvenme, sonu hüsran.", mood: "negative", color: "#dc2626" },
+            { text: "İmkansız diye bir şey yoktur... Ama bu imkansız.", mood: "negative", color: "#ef4444" },
+
+            // İronik & Kaçamak Cevaplar
+            { text: "Bana soracağına git uyu, kafan karışmış.", mood: "neutral", color: "#f59e0b" },
+            { text: "Küreye az önce format attım, tekrar sor.", mood: "neutral", color: "#d97706" },
+            { text: "Şu an kahve molasındayım, sonra gel.", mood: "neutral", color: "#f59e0b" },
+            { text: "Cevap verirdim ama moralin bozulur...", mood: "neutral", color: "#ea580c" },
+            { text: "Bunu bilsem yarın iddaa kuponu yapardım.", mood: "neutral", color: "#d97706" },
+            { text: "Sen önce kendine dürüst ol bakalım.", mood: "neutral", color: "#8b5cf6" },
+            { text: "Küre dondu... Lütfen tekrar dene.", mood: "neutral", color: "#64748b" },
+            { text: "Cevap vermek istemiyorum, hakkımı saklı tutuyorum.", mood: "neutral", color: "#78716c" },
+            { text: "Bir bardak su iç, sakinleş, baştan düşün.", mood: "neutral", color: "#0ea5e9" },
+            { text: "Bu soruya cevap vermem için beni 2 kez salla.", mood: "neutral", color: "#f59e0b" },
+            { text: "Midyata pirince giderken evdeki bulgurdan olma.", mood: "neutral", color: "#ea580c" },
+            { text: "Soru güzel ama muhatabın yanlış kanka.", mood: "neutral", color: "#eab308" },
+
+            // Klasik & Gizemli
+            { text: "Sis perdesi henüz aralanmadı...", mood: "mystic", color: "#8b5cf6" },
+            { text: "Zaman her şeyin ilacıdır, bekle.", mood: "mystic", color: "#6366f1" },
+            { text: "İşaretler belirsiz, rüzgar nereden eserse.", mood: "mystic", color: "#a855f7" },
+            { text: "Bu tamamen senin cesaretine bağlı.", mood: "mystic", color: "#3b82f6" },
+            { text: "Cevap kalbinde saklı, bana sorma.", mood: "mystic", color: "#ec4899" },
+            { text: "Kader şu an iki seçenek arasında kararsız.", mood: "mystic", color: "#8b5cf6" }
         ];
 
-        document.getElementById("ask-button").addEventListener("click", function() {
-            let question = document.getElementById("question").value.trim();
-            if (question === "") {
-                alert("Lütfen bir soru sorun!");
+        /* ==============================================================
+           WEB AUDIO API - SAF PROSEDÜREL SES MOTORU
+           (Harici ses dosyası gerekmez, sıfır ağ bağımlılığı)
+           ============================================================== */
+        class SoundFX {
+            constructor() {
+                this.ctx = null;
+                this.enabled = true;
+            }
+
+            init() {
+                if (!this.ctx) {
+                    const AudioContext = window.AudioContext || window.webkitAudioContext;
+                    if (AudioContext) {
+                        this.ctx = new AudioContext();
+                    }
+                }
+                if (this.ctx && this.ctx.state === 'suspended') {
+                    this.ctx.resume();
+                }
+            }
+
+            // Top sallanırken tok mistik gıcırtı / çalkantı sesi
+            playShake() {
+                if (!this.enabled) return;
+                this.init();
+                if (!this.ctx) return;
+
+                const now = this.ctx.currentTime;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(140, now);
+                osc.frequency.exponentialRampToValueAtTime(70, now + 0.35);
+
+                gain.gain.setValueAtTime(0.2, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+
+                osc.start(now);
+                osc.stop(now + 0.35);
+            }
+
+            // Cevap belirirken sihirli kristal tınısı
+            playChime() {
+                if (!this.enabled) return;
+                this.init();
+                if (!this.ctx) return;
+
+                const notes = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6
+                notes.forEach((freq, idx) => {
+                    const now = this.ctx.currentTime + (idx * 0.08);
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(freq, now);
+
+                    gain.gain.setValueAtTime(0.12, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.5);
+
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+
+                    osc.start(now);
+                    osc.stop(now + 0.5);
+                });
+            }
+        }
+
+        const sfx = new SoundFX();
+
+        /* ==============================================================
+           DOM ELEMANLARI & DEĞİŞKENLER
+           ============================================================== */
+        const magicBall = document.getElementById("magic-ball");
+        const ballStage = document.getElementById("ball-stage");
+        const badgeEight = document.getElementById("badge-eight");
+        const mysticViewport = document.getElementById("mystic-viewport");
+        const answerText = document.getElementById("answer-text");
+        const questionInput = document.getElementById("question-input");
+        const askButton = document.getElementById("ask-button");
+        const statusHint = document.getElementById("status-hint");
+        const ambientGlow = document.getElementById("ambient-glow");
+        const soundBtn = document.getElementById("sound-btn");
+        const resetBtn = document.getElementById("reset-btn");
+        const presetChips = document.querySelectorAll(".chip");
+
+        let isBusy = false;
+        let hasAnswer = false;
+        let lastAnswerIndex = -1;
+
+        /* ==============================================================
+           3D FARE PARALLAX VE TILT MOTORU
+           ============================================================== */
+        let targetRotateX = 0;
+        let targetRotateY = 0;
+        let currentRotateX = 0;
+        let currentRotateY = 0;
+        let isHovered = false;
+
+        function updateParallax() {
+            if (!isBusy) {
+                // Yumuşak İnterpolasyon (LERP)
+                currentRotateX += (targetRotateX - currentRotateX) * 0.15;
+                currentRotateY += (targetRotateY - currentRotateY) * 0.15;
+
+                if (isHovered) {
+                    magicBall.style.transform = `perspective(900px) rotateX(${currentRotateX}deg) rotateY(${currentRotateY}deg)`;
+                }
+            }
+            requestAnimationFrame(updateParallax);
+        }
+        requestAnimationFrame(updateParallax);
+
+        function handlePointerMove(e) {
+            if (isBusy) return;
+            const rect = ballStage.getBoundingClientRect();
+            const centerX = rect.left + rect.width / 2;
+            const centerY = rect.top + rect.height / 2;
+
+            const deltaX = e.clientX - centerX;
+            const deltaY = e.clientY - centerY;
+
+            // Maksimum 24 derece tilt
+            targetRotateY = Math.max(-24, Math.min(24, deltaX * 0.08));
+            targetRotateX = Math.max(-24, Math.min(24, -deltaY * 0.08));
+
+            // Işık kaynağını fareye doğru dinamik kaydır (3D Optik İllüzyon)
+            const lightX = 35 + Math.max(-20, Math.min(20, deltaX * 0.06));
+            const lightY = 28 + Math.max(-20, Math.min(20, deltaY * 0.06));
+            document.documentElement.style.setProperty('--light-x', `${lightX}%`);
+            document.documentElement.style.setProperty('--light-y', `${lightY}%`);
+        }
+
+        window.addEventListener("mousemove", (e) => {
+            isHovered = true;
+            magicBall.classList.remove("idle-floating");
+            handlePointerMove(e);
+        });
+
+        document.addEventListener("mouseleave", () => {
+            isHovered = false;
+            targetRotateX = 0;
+            targetRotateY = 0;
+            magicBall.style.transform = '';
+            magicBall.classList.add("idle-floating");
+            document.documentElement.style.setProperty('--light-x', '35%');
+            document.documentElement.style.setProperty('--light-y', '28%');
+        });
+
+        /* ==============================================================
+           SORU SORMA VE SALLAMA MEKANİZMASI
+           ============================================================== */
+        function askTheOracle() {
+            if (isBusy) return;
+
+            const question = questionInput.value.trim();
+            if (!question) {
+                questionInput.focus();
+                statusHint.textContent = "⚠️ Lütfen önce aklındaki soruyu yaz!";
+                statusHint.style.color = "#f59e0b";
+                magicBall.classList.add("is-shaking");
+                sfx.playShake();
+                setTimeout(() => {
+                    magicBall.classList.remove("is-shaking");
+                }, 400);
                 return;
             }
-            let randomIndex = Math.floor(Math.random() * answers.length);
-            let selectedAnswer = answers[randomIndex];
-            document.getElementById("answer").innerText = selectedAnswer.text;
-            document.body.style.backgroundColor = selectedAnswer.color;
-            
-            // 8 yazısını gizleme
-            document.getElementById("ball-number").style.display = "none";
-            document.getElementById("answer").style.display = "flex"; // Cevabı göstermek için
+
+            isBusy = true;
+            askButton.disabled = true;
+            statusHint.textContent = "🔮 Küre çalkalanıyor, evrenin enerjisi toplanıyor...";
+            statusHint.style.color = "#38bdf8";
+
+            // Sesi başlat
+            sfx.playShake();
+
+            // Rölanti animasyonunu durdur ve şiddetli salla
+            magicBall.classList.remove("idle-floating");
+            magicBall.classList.add("is-shaking");
+
+            // Rozeti gizle
+            badgeEight.style.opacity = "0";
+            badgeEight.style.transform = "scale(0.7)";
+
+            // Cevap penceresini hazırla
+            mysticViewport.style.opacity = "1";
+            mysticViewport.style.transform = "scale(1)";
+            answerText.classList.remove("reveal-answer");
+            answerText.style.opacity = "0";
+
+            // 850ms sallanma sonrası cevabı getir
+            setTimeout(() => {
+                magicBall.classList.remove("is-shaking");
+
+                // Yeni rastgele cevap seç (ardışık tekrarı önle)
+                let randomIndex;
+                do {
+                    randomIndex = Math.floor(Math.random() * answers.length);
+                } while (randomIndex === lastAnswerIndex && answers.length > 1);
+                lastAnswerIndex = randomIndex;
+
+                const selected = answers[randomIndex];
+                answerText.textContent = selected.text;
+
+                // Dinamik font boyutu ayarı (uzun cevaplar taşmasın)
+                if (selected.text.length > 32) {
+                    answerText.style.fontSize = "11.5px";
+                } else if (selected.text.length > 20) {
+                    answerText.style.fontSize = "13px";
+                } else {
+                    answerText.style.fontSize = "14.5px";
+                }
+
+                // Yazı rengi ve ortam parıltısını ayarla
+                answerText.style.color = selected.color;
+                answerText.style.textShadow = `0 0 12px ${selected.color}, 0 0 24px rgba(0,0,0,0.8)`;
+                document.documentElement.style.setProperty('--mood-glow', `${selected.color}66`);
+
+                // Cevabı yukarı süzdür
+                answerText.classList.add("reveal-answer");
+                sfx.playChime();
+
+                hasAnswer = true;
+                isBusy = false;
+                askButton.disabled = false;
+                statusHint.textContent = "✨ Kehanet tamamlandı! Yeni soru için tekrar sorabilirsin.";
+                statusHint.style.color = "#10b981";
+
+                if (!isHovered) {
+                    magicBall.classList.add("idle-floating");
+                }
+            }, 850);
+        }
+
+        /* ==============================================================
+           SIFIRLAMA (RESET) FONKSİYONU
+           ============================================================== */
+        function resetBall() {
+            if (isBusy) return;
+            badgeEight.style.opacity = "1";
+            badgeEight.style.transform = "scale(1)";
+            mysticViewport.style.opacity = "0";
+            mysticViewport.style.transform = "scale(0.85)";
+            answerText.textContent = "";
+            answerText.classList.remove("reveal-answer");
+            questionInput.value = "";
+            statusHint.textContent = "Top başlangıç durumuna döndü. Sorunu sor!";
+            statusHint.style.color = "#64748b";
+            document.documentElement.style.setProperty('--mood-glow', 'rgba(79, 140, 255, 0.4)');
+            hasAnswer = false;
+            questionInput.focus();
+        }
+
+        /* ==============================================================
+           ETKİNLİK DİNLEYİCİLERİ
+           ============================================================== */
+        // Form & Enter Tuşu
+        document.getElementById("ask-form").addEventListener("submit", (e) => {
+            e.preventDefault();
+            askTheOracle();
+        });
+
+        // Buton Tıklaması
+        askButton.addEventListener("click", askTheOracle);
+
+        // Topa Doğrudan Tıklama
+        magicBall.addEventListener("click", () => {
+            if (!hasAnswer || questionInput.value.trim() !== "") {
+                askTheOracle();
+            } else {
+                resetBall();
+            }
+        });
+
+        // Topa Enter veya Boşluk ile Basma (A11y)
+        magicBall.addEventListener("keydown", (e) => {
+            if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                askTheOracle();
+            }
+        });
+
+        // Hızlı Soru Çipleri
+        presetChips.forEach(chip => {
+            chip.addEventListener("click", () => {
+                questionInput.value = chip.getAttribute("data-q");
+                askTheOracle();
+            });
+        });
+
+        // Sıfırlama Butonu
+        resetBtn.addEventListener("click", resetBall);
+
+        // Ses Aç / Kapa Butonu
+        soundBtn.addEventListener("click", () => {
+            sfx.enabled = !sfx.enabled;
+            soundBtn.textContent = sfx.enabled ? "🔊" : "🔇";
+            soundBtn.title = sfx.enabled ? "Ses Açık" : "Ses Kapalı";
         });
     </script>
 </body>
